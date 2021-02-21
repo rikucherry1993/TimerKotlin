@@ -41,7 +41,7 @@ class PrefUtil {
             editor.apply()
         }
 
-        private const val PREVIOUS_TIMER_REMAINING_SECONDS_ID = "PREVIOUS_TIMER_LENGTH_SECONDS_ID"
+        private const val PREVIOUS_TIMER_REMAINING_SECONDS_ID = "PREVIOUS_TIMER_REMAINING_SECONDS_ID"
 
         // 若在timer执行过程中变更属性，回到timer画面后，timer应当按照之前的属性设置执行完毕
         fun getPreviousTimerRemainingSeconds(context: Context): Long {

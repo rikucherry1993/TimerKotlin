@@ -2,6 +2,7 @@ package com.tutorial.timeractivity
 
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
@@ -15,10 +16,10 @@ class MainActivity : AppCompatActivity() {
         Stopped, Paused, Running
     }
 
-    private lateinit var timer:CountDownTimer
-    private var timerLengthSeconds = 0L
-    private var secondsRemaining = 0L
-    private var timerState: TimerState = TimerState.Stopped
+    private lateinit var timer: CountDownTimer
+    private var timerLengthSeconds: Long = 0
+    private var secondsRemaining: Long = 0
+    private var timerState = TimerState.Stopped
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +46,6 @@ class MainActivity : AppCompatActivity() {
         fab_stop.setOnClickListener { v ->
             timer.cancel()
             onTimerFinished()
-            updateButtons()
 
         }
 
@@ -111,6 +111,7 @@ class MainActivity : AppCompatActivity() {
         PrefUtil.setPreviousTimerRemainingSeconds(timerLengthSeconds, this)
         secondsRemaining = timerLengthSeconds
 
+        updateButtons()
         updateCountdownUI()
     }
 
@@ -128,9 +129,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun setNewTimerLength(){
         val lengthInMinutes = PrefUtil.getTimerLength(this)
-        timerLengthSeconds = lengthInMinutes * 60L
+        timerLengthSeconds = (lengthInMinutes * 60L)
         progress_countdown.max = timerLengthSeconds.toInt()
-        progress_countdown.progress = 0
     }
 
     private fun setPreviousTimerLength(){
@@ -141,15 +141,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateCountdownUI() {
         val minutesUntilFinished = secondsRemaining / 60
-        //todo : ??
         val secondsInMinuteUntilFinished = secondsRemaining - minutesUntilFinished * 60
         val secondsStr = secondsInMinuteUntilFinished.toString()
 
-        textView_countdown.text = "$minutesUntilFinished:${
-        if (secondsStr.length == 2) secondsStr
+        textView_countdown.text = "$minutesUntilFinished:${if (secondsStr.length == 2) secondsStr
         else "0" + secondsStr}"
 
-        progress_countdown.progress = secondsRemaining.toInt()
+        progress_countdown.progress =  (timerLengthSeconds - secondsRemaining).toInt()
     }
 
     private fun updateButtons(){
@@ -161,7 +159,7 @@ class MainActivity : AppCompatActivity() {
             }
             TimerState.Stopped -> {
                 fab_play.isEnabled = true
-                fab_pause.isEnabled = true
+                fab_pause.isEnabled = false
                 fab_stop.isEnabled = false
             }
             TimerState.Paused -> {
