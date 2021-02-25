@@ -1,5 +1,9 @@
 package com.tutorial.timeractivity
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
@@ -9,8 +13,42 @@ import androidx.appcompat.app.AppCompatActivity
 import com.tutorial.timeractivity.util.PrefUtil
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
+    
+    // 类似于static member
+    companion object {
+        fun setAlarm(context: Context, nowSeconds: Long, remainingSeconds: Long): Long{
+            val wakeUpTime = (nowSeconds + remainingSeconds) * 1000
+            // note: as: unsafe casting(as? is safe), the equivalent of (type)foo in java.
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            // note: 'ClassName::class.java'(kotlin) = ClassName.class(java) (class object)
+            val intent = Intent(context, TimeExpiredReceiver::class.java)
+            val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0)
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, wakeUpTime, pendingIntent)
+
+            PrefUtil.setAlarmSetTime(nowSeconds,context)
+            return wakeUpTime
+        }
+
+        fun removeAlarm(context: Context){
+            val intent = Intent(context, TimeExpiredReceiver::class.java)
+            val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0)
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            alarmManager.cancel(pendingIntent)
+
+            // note: 0代表Alarm未开启
+            PrefUtil.setAlarmSetTime(0,context)
+        }
+
+
+        // note: kotlin的property写法。initializer，getter，setter都是optional的。type有时也可以省略
+        val nowSeconds: Long
+            get() = Calendar.getInstance().timeInMillis / 1000
+
+
+    }
 
     enum class TimerState{
         Stopped, Paused, Running
@@ -57,7 +95,8 @@ class MainActivity : AppCompatActivity() {
 
         initTimer()
 
-        //TODO: remove background timer, hide notification
+        removeAlarm(this)
+        //TODO: hide notification
     }
 
 
@@ -66,7 +105,10 @@ class MainActivity : AppCompatActivity() {
 
         if (timerState == TimerState.Running) {
             timer.cancel()
-            //TODO: start background timer and show notification
+            // note: 创建后台Alarm，将在现在时刻+闹钟的剩余时间唤醒
+            val wakeUpTime = setAlarm(this, nowSeconds, secondsRemaining)
+
+            //TODO: show notification
         }
         else if(timerState == TimerState.Paused) {
             //TODO: show notification
@@ -90,12 +132,17 @@ class MainActivity : AppCompatActivity() {
         else
             timerLengthSeconds
 
-        //TODO: change secondsRemaining according to where the background timer stopped
+        val alarmSetTime = PrefUtil.getAlarmSetTime(this)
+        // note: alarmSetTime > 0 means alarm is set.
+        if (alarmSetTime > 0)
+            secondsRemaining -= nowSeconds - alarmSetTime
 
+        // note: Alarm has finished on background
+        if (secondsRemaining <= 0)
+            onTimerFinished()
+        else if (timerState == TimerState.Running)
+            startTimer()
 
-        //resume where we left off
-        if (timerState == TimerState.Running)
-                startTimer()
         updateButtons()
         updateCountdownUI()
 

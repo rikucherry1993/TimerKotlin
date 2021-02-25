@@ -55,6 +55,20 @@ class PrefUtil {
             editor.apply()
         }
 
+        // ★在共享偏好的键名中使用package ID
+        private const val ALARM_SET_TIME_ID = "com.tutorial.timer.backgrounded_time"
+
+        fun getAlarmSetTime(context: Context): Long {
+            val preference = PreferenceManager.getDefaultSharedPreferences(context)
+            return preference.getLong(ALARM_SET_TIME_ID, 0)
+        }
+
+        fun setAlarmSetTime(time: Long, context: Context) {
+            val editor = PreferenceManager.getDefaultSharedPreferences(context).edit()
+            editor.putLong(ALARM_SET_TIME_ID, time)
+            editor.apply()
+        }
+
     }
 
 }
