@@ -10,9 +10,20 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TimerActivity">
         <receiver
+            android:name=".TimeNotificationActionReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="stop"/>
+                <action android:name="start"/>
+                <action android:name="pause"/>
+                <action android:name="resume"/>
+            </intent-filter>
+        </receiver>
+        <receiver
             android:name=".TimeExpiredReceiver"
             android:enabled="true"
-            android:exported="false"></receiver>
+            android:exported="false" />
 
         <activity
             android:name=".MainActivity"

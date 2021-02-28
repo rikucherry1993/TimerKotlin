@@ -6,10 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import com.tutorial.timeractivity.util.NotificationUtil
 import com.tutorial.timeractivity.util.PrefUtil
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
         initTimer()
 
         removeAlarm(this)
-        //TODO: hide notification
+        NotificationUtil.hideTimerNotification(this)
     }
 
 
@@ -107,11 +107,10 @@ class MainActivity : AppCompatActivity() {
             timer.cancel()
             // note: 创建后台Alarm，将在现在时刻+闹钟的剩余时间唤醒
             val wakeUpTime = setAlarm(this, nowSeconds, secondsRemaining)
-
-            //TODO: show notification
+            NotificationUtil.showTimerRunning(this,wakeUpTime)
         }
         else if(timerState == TimerState.Paused) {
-            //TODO: show notification
+            NotificationUtil.showTimerPaused(this)
         }
 
         PrefUtil.setPreviousTimerLengthSeconds(timerLengthSeconds, this)
