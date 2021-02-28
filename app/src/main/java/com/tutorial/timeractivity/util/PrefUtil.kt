@@ -7,9 +7,11 @@ import com.tutorial.timeractivity.MainActivity
 class PrefUtil {
     companion object {
         // Something like static members in Java/C#
+
+        private const val TIMER_LENGTH_ID = "com.tutorial.timeractivity.timer_length"
         fun getTimerLength(context: Context): Int {
-            //TODO: placeholder
-            return 1
+            val preference = PreferenceManager.getDefaultSharedPreferences(context)
+            return preference.getInt(TIMER_LENGTH_ID, 10)
         }
 
         private const val PREVIOUS_TIMER_LENGTH_SECONDS_ID = "PREVIOUS_TIMER_LENGTH_SECONDS_ID"
